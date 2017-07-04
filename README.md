@@ -18,15 +18,15 @@ Add to your `main.go`:
 import logger "github.com/blendle/go-logger"
 
 func init() {
-	c := &logger.Config{
-		App:         "my-app",
-		Tier:        "api",
-		Production:  false,
-		Version:     "cf89f839",
-		Environment: "staging",
-	}
+  c := &logger.Config{
+    App:         "my-app",
+    Tier:        "api",
+    Production:  false,
+    Version:     "cf89f839",
+    Environment: "staging",
+  }
 
-	logger.Init(c)
+  logger.Init(c)
 }
 ```
 
@@ -36,7 +36,22 @@ Then use it throughout your application:
 logger.L.Warn("Something happened!")
 ```
 
-### Debugging
+### Custom Zap Configuration
+
+You can also provide custom Zap configuration on initialization, if you need it:
+
+```golang
+options := func(c zap.Config) {
+  c.Sampling = &zap.SamplingConfig{
+    Initial:    100,
+    Thereafter: 100,
+  }
+}
+
+logger.Init(c, options)
+```
+
+## Debugging
 
 You can send the `usr1` signal to your application to switch the log level
 between the default `INFO` and `DEBUG` level on runtime.

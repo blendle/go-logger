@@ -26,7 +26,7 @@ var L = zap.NewNop()
 var LogLevel = zap.NewAtomicLevel()
 
 // Init initializes the logger
-func Init(config *Config) {
+func Init(config *Config, options ...func(zap.Config)) {
 	var err error
 
 	encoderConfig := zapcore.EncoderConfig{
@@ -50,6 +50,10 @@ func Init(config *Config) {
 		ErrorOutputPaths:  []string{"stderr"},
 		DisableCaller:     true,
 		DisableStacktrace: true,
+	}
+
+	for _, option := range options {
+		option(zapconfig)
 	}
 
 	if os.Getenv("DEBUG") == "true" {
