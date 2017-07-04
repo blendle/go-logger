@@ -20,7 +20,7 @@ type Config struct {
 }
 
 // L is the global logger instance.
-var L *zap.Logger
+var L = zap.NewNop()
 
 // LogLevel is the current log level of the logger.
 var LogLevel = zap.NewAtomicLevel()
