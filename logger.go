@@ -30,26 +30,43 @@ func Init(config *Config, options ...func(zap.Config)) {
 	var err error
 
 	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "timestamp",
-		LevelKey:       "severity",
-		NameKey:        "logger",
-		CallerKey:      "caller",
-		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		TimeKey:       "timestamp",
+		LevelKey:      "severity",
+		NameKey:       "logger",
+		CallerKey:     "caller",
+		MessageKey:    "message",
+		StacktraceKey: "stacktrace",
+		LineEnding:    zapcore.DefaultLineEnding,
+		EncodeLevel: func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+			switch l {
+			case zapcore.DebugLevel:
+				enc.AppendString("DEBUG")
+			case zapcore.InfoLevel:
+				enc.AppendString("INFO")
+			case zapcore.WarnLevel:
+				enc.AppendString("WARNING")
+			case zapcore.ErrorLevel:
+				enc.AppendString("ERROR")
+			case zapcore.DPanicLevel:
+				enc.AppendString("CRITICAL")
+			case zapcore.PanicLevel:
+				enc.AppendString("ALERT")
+			case zapcore.FatalLevel:
+				enc.AppendString("EMERGENCY")
+			}
+		},
 		EncodeTime:     zapcore.ISO8601TimeEncoder,
 		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
 	zapconfig := zap.Config{
-		Level:       LogLevel,
-		Development: !config.Production,
-		Encoding:          "json",
-		EncoderConfig:     encoderConfig,
-		OutputPaths:       []string{"stderr"},
-		ErrorOutputPaths:  []string{"stderr"},
-		DisableCaller:     true,
-		DisableStacktrace: true,
+		Level:            LogLevel,
+		Development:      !config.Production,
+		Encoding:         "json",
+		EncoderConfig:    encoderConfig,
+		OutputPaths:      []string{"stderr"},
+		ErrorOutputPaths: []string{"stderr"},
 	}
 
 	for _, option := range options {
