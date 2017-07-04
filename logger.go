@@ -44,10 +44,6 @@ func Init(config *Config) {
 	zapconfig := zap.Config{
 		Level:       LogLevel,
 		Development: !config.Production,
-		Sampling: &zap.SamplingConfig{
-			Initial:    100,
-			Thereafter: 100,
-		},
 		Encoding:          "json",
 		EncoderConfig:     encoderConfig,
 		OutputPaths:       []string{"stderr"},
