@@ -1,14 +1,11 @@
 # go-logger
 
-This package contains shared logic for Go-based logging.
+This package contains shared logic for Go-based structured logging.
 
 This package uses the [`zap`][zap] logging package under the hood. See its
 [README][zap] for more details on the logging API.
 
-See [this wiki page][wiki] for more details on logging at Blendle.
-
 [zap]: https://github.com/uber-go/zap#zap-zap---
-[wiki]: https://www.notion.so/blendle/Structured-Logging-5e6fb67cd17c42acb7f180c37f436c2a
 
 ## Usage
 
