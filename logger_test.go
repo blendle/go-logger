@@ -14,19 +14,16 @@ import (
 func TestNew(t *testing.T) {
 	t.Parallel()
 
-	zaplog, err := zap.NewProduction()
-	require.NoError(t, err)
-
-	assert.IsType(t, &zap.Logger{}, logger.New("", "", zaplog))
+	assert.IsType(t, &zap.Logger{}, logger.New("", ""))
 }
 
 func TestNew_Stackdriver(t *testing.T) {
 	t.Parallel()
 
 	core, logs := observer.New(zapcore.WarnLevel)
-	zaplog := zap.New(core)
+	opt := zap.WrapCore(func(_ zapcore.Core) zapcore.Core { return core })
 
-	logger := logger.New("", "", zaplog)
+	logger := logger.New("", "", opt)
 	logger.Warn("")
 
 	require.Len(t, logs.All(), 1)

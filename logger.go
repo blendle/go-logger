@@ -7,14 +7,24 @@ import (
 )
 
 // New returns a new logger, ready to use in our services.
-func New(service, version string, zaplog *zap.Logger) *zap.Logger {
+func New(service, version string, options ...zap.Option) *zap.Logger {
+	level := zap.NewAtomicLevelAt(zapcore.InfoLevel)
+
+	config := &zap.Config{
+		Level:            level,
+		Encoding:         "json",
+		EncoderConfig:    stackdriver.EncoderConfig,
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
+	}
+
 	stackcore := zap.WrapCore(func(core zapcore.Core) zapcore.Core {
 		return &stackdriver.Core{Core: core}
 	})
 
 	fields := zap.Fields(zap.String("service", service), zap.String("version", version))
 
-	return zaplog.WithOptions(stackcore, fields)
+	return Must(config.Build(append(options, stackcore, fields)...))
 }
 
 // Must is a convenience function that takes a zaplog and error as input, panics
