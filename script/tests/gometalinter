@@ -31,5 +31,6 @@ gometalinter \
   --disable=dupl \
   --disable=testify \
   --disable=test \
+  --disable=vetshadow \
   --linter='lll:lll -e func -g -l {maxlinelength}:PATH:LINE:MESSAGE' \
   "${@:-./...}"
