@@ -45,6 +45,18 @@ func TestLogger_Stackdriver_ServiceContext(t *testing.T) {
 	assert.NotNil(t, logs.All()[0].ContextMap()["serviceContext"])
 }
 
+func TestLogger_Stackdriver_Labels(t *testing.T) {
+	t.Parallel()
+
+	want := map[string]interface{}{"foo": "bar", "baz": "qux"}
+
+	logger, logs := logger.TestNew(t)
+	logger.Warn("", stackdriver.LogLabels("foo", "bar", "baz", "qux"))
+
+	require.Len(t, logs.All(), 1)
+	assert.EqualValues(t, want, logs.All()[0].ContextMap()["labels"])
+}
+
 func TestMust(t *testing.T) {
 	t.Parallel()
 

@@ -12,6 +12,7 @@ package stackdriver
 // furnished to do so, subject to the following conditions:
 
 import (
+	"math"
 	"runtime"
 
 	"go.uber.org/zap"
@@ -160,6 +161,29 @@ func LogUser(user string) zapcore.Field {
 
 func LogReportLocation(loc *ReportLocation) zapcore.Field {
 	return zap.Object(logKeyContextReportLocation, loc)
+}
+
+func LogLabels(strings ...string) zapcore.Field {
+	size := int(math.Ceil(float64(len(strings)) / 2))
+
+	labels := make(labels, 0, size)
+
+	for i := 0; i <= size; i = i + 2 {
+		var k, v string
+
+		if len(strings) < i+1 {
+			break
+		}
+
+		k = strings[i]
+		if len(strings) >= i+2 {
+			v = strings[i+1]
+		}
+
+		labels = append(labels, &label{k, v})
+	}
+
+	return zap.Object(logKeyLabels, labels)
 }
 
 func EncodeLevel(lv zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {

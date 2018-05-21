@@ -173,6 +173,30 @@ func TestLogReportLocation(t *testing.T) {
 	assert.Equal(t, zap.Object(logKeyContextReportLocation, loc), field)
 }
 
+func TestLogLabels(t *testing.T) {
+	lbl := labels{{"foo", "bar"}, {"baz", "qux"}}
+	field := LogLabels("foo", "bar", "baz", "qux")
+	assert.Equal(t, zap.Object(logKeyLabels, lbl), field)
+}
+
+func TestLogLabels_Empty(t *testing.T) {
+	lbl := labels{}
+	field := LogLabels()
+	assert.Equal(t, zap.Object(logKeyLabels, lbl), field)
+}
+
+func TestLogLabels_Uneven(t *testing.T) {
+	lbl := labels{{"foo", ""}}
+	field := LogLabels("foo")
+	assert.Equal(t, zap.Object(logKeyLabels, lbl), field)
+}
+
+func TestLogLabels_UnevenMultiple(t *testing.T) {
+	lbl := labels{{"foo", "bar"}, {"baz", ""}}
+	field := LogLabels("foo", "bar", "baz")
+	assert.Equal(t, zap.Object(logKeyLabels, lbl), field)
+}
+
 func TestEncodeLevel(t *testing.T) {
 	tests := []struct {
 		Level    zapcore.Level
