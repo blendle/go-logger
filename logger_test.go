@@ -17,3 +17,9 @@ func TestNew(t *testing.T) {
 
 	assert.IsType(t, &zap.Logger{}, logger.New("", "", zaplog))
 }
+
+func TestMust(t *testing.T) {
+	t.Parallel()
+
+	assert.IsType(t, &zap.Logger{}, logger.Must(zap.NewProduction()))
+}
