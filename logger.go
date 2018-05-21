@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"os"
 	"testing"
 
 	"github.com/blendle/go-logger/stackdriver"
@@ -19,6 +20,10 @@ func New(service, version string, options ...zap.Option) *zap.Logger {
 		EncoderConfig:    stackdriver.EncoderConfig,
 		OutputPaths:      []string{"stdout"},
 		ErrorOutputPaths: []string{"stderr"},
+	}
+
+	if env, ok := os.LookupEnv("ENV"); ok && env != "production" {
+		config.Development = true
 	}
 
 	stackcore := zap.WrapCore(func(core zapcore.Core) zapcore.Core {

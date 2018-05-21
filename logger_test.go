@@ -1,6 +1,7 @@
 package logger_test
 
 import (
+	"os"
 	"testing"
 
 	logger "github.com/blendle/go-logger"
@@ -55,6 +56,44 @@ func TestLogger_Stackdriver_Labels(t *testing.T) {
 
 	require.Len(t, logs.All(), 1)
 	assert.EqualValues(t, want, logs.All()[0].ContextMap()["labels"])
+}
+
+func TestLogger_Development_NonProduction(t *testing.T) {
+	_ = os.Setenv("ENV", "non-production")
+	defer func() { _ = os.Unsetenv("ENV") }()
+
+	logger, logs := logger.TestNew(t)
+	fn := func() { logger.DPanic("") }
+
+	// because we've set the environment to anything other than "production", any
+	// `DPanic` log call will cause a panic.
+	assert.Panics(t, fn)
+	assert.Len(t, logs.All(), 1)
+}
+
+func TestLogger_Development_Production(t *testing.T) {
+	_ = os.Setenv("ENV", "production")
+	defer func() { _ = os.Unsetenv("ENV") }()
+
+	logger, logs := logger.TestNew(t)
+	fn := func() { logger.DPanic("") }
+
+	// because we've set the environment to "production", any `DPanic` log call
+	// will not cause a panic.
+	assert.NotPanics(t, fn)
+	assert.Len(t, logs.All(), 1)
+}
+
+func TestLogger_Development_Unset(t *testing.T) {
+	t.Parallel()
+
+	logger, logs := logger.TestNew(t)
+	fn := func() { logger.DPanic("") }
+
+	// because we haven't set the "ENV" environment variable, any `DPanic` log
+	// call will not cause a panic.
+	assert.NotPanics(t, fn)
+	assert.Len(t, logs.All(), 1)
 }
 
 func TestMust(t *testing.T) {
