@@ -21,7 +21,7 @@ func New(service, version string, options ...zap.Option) *zap.Logger {
 		Level:            level,
 		Encoding:         "json",
 		EncoderConfig:    stackdriver.EncoderConfig,
-		OutputPaths:      []string{"stdout"},
+		OutputPaths:      []string{"stderr"},
 		ErrorOutputPaths: []string{"stderr"},
 	}
 
