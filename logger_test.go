@@ -7,8 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestNew(t *testing.T) {
@@ -17,13 +15,19 @@ func TestNew(t *testing.T) {
 	assert.IsType(t, &zap.Logger{}, logger.New("", ""))
 }
 
-func TestNew_Stackdriver(t *testing.T) {
+func TestTestNew(t *testing.T) {
 	t.Parallel()
 
-	core, logs := observer.New(zapcore.WarnLevel)
-	opt := zap.WrapCore(func(_ zapcore.Core) zapcore.Core { return core })
+	logger, logs := logger.TestNew(t)
+	logger.Debug("")
 
-	logger := logger.New("", "", opt)
+	assert.Len(t, logs.All(), 1)
+}
+
+func TestLogger_Stackdriver_Context(t *testing.T) {
+	t.Parallel()
+
+	logger, logs := logger.TestNew(t)
 	logger.Warn("")
 
 	require.Len(t, logs.All(), 1)
