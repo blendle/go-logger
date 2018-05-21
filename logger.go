@@ -25,7 +25,10 @@ func New(service, version string, options ...zap.Option) *zap.Logger {
 		return &stackdriver.Core{Core: core}
 	})
 
-	fields := zap.Fields(zap.String("service", service), zap.String("version", version))
+	fields := zap.Fields(stackdriver.LogServiceContext(&stackdriver.ServiceContext{
+		Service: service,
+		Version: version,
+	}))
 
 	return Must(config.Build(append(options, stackcore, fields)...))
 }

@@ -34,6 +34,16 @@ func TestLogger_Stackdriver_Context(t *testing.T) {
 	assert.NotNil(t, logs.All()[0].ContextMap()["context"])
 }
 
+func TestLogger_Stackdriver_ServiceContext(t *testing.T) {
+	t.Parallel()
+
+	logger, logs := logger.TestNew(t)
+	logger.Warn("")
+
+	require.Len(t, logs.All(), 1)
+	assert.NotNil(t, logs.All()[0].ContextMap()["serviceContext"])
+}
+
 func TestMust(t *testing.T) {
 	t.Parallel()
 
