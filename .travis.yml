@@ -1,0 +1,4 @@
+language: go
+
+install: script/setup
+script: script/test
