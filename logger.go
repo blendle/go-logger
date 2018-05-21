@@ -61,6 +61,8 @@ func Must(zaplog *zap.Logger, err error) *zap.Logger {
 // TestNew calls New, but returns both the logger, and an observer that can be
 // used to fetch and compare delivered logs.
 func TestNew(tb testing.TB, options ...zap.Option) (*zap.Logger, *observer.ObservedLogs) {
+	tb.Helper()
+
 	core, logs := observer.New(zapcore.DebugLevel)
 	opt := zap.WrapCore(func(_ zapcore.Core) zapcore.Core { return core })
 

@@ -1,3 +1,4 @@
+// nolint:golint
 package stackdriver
 
 // MIT License
@@ -57,22 +58,24 @@ func (c *Context) Clone() *Context {
 	return output
 }
 
-func (c *Context) MarshalLogObject(e zapcore.ObjectEncoder) (err error) {
+func (c *Context) MarshalLogObject(e zapcore.ObjectEncoder) error {
+	var err error
+
 	e.AddString("user", c.User)
 
 	if c.HTTPRequest != nil {
 		if err = e.AddObject("httpRequest", c.HTTPRequest); err != nil {
-			return
+			return err
 		}
 	}
 
 	if c.ReportLocation != nil {
 		if err = e.AddObject("reportLocation", c.ReportLocation); err != nil {
-			return
+			return err
 		}
 	}
 
-	return
+	return err
 }
 
 type HTTPRequest struct {
