@@ -2,7 +2,9 @@ package logger_test
 
 import (
 	"os"
+	"syscall"
 	"testing"
+	"time"
 
 	logger "github.com/blendle/go-logger"
 	"github.com/blendle/go-logger/stackdriver"
@@ -113,6 +115,25 @@ func TestLogger_Debug_Disabled(t *testing.T) {
 
 	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))
 	assert.True(t, logger.Core().Enabled(zapcore.InfoLevel))
+}
+
+func TestLogger_LevelToggler(t *testing.T) {
+	t.Parallel()
+
+	logger := logger.New("", "")
+	time.Sleep(1 * time.Millisecond)
+
+	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))
+
+	syscall.Kill(syscall.Getpid(), syscall.SIGUSR1)
+	time.Sleep(1 * time.Millisecond)
+
+	assert.True(t, logger.Core().Enabled(zapcore.DebugLevel))
+
+	syscall.Kill(syscall.Getpid(), syscall.SIGUSR1)
+	time.Sleep(1 * time.Millisecond)
+
+	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))
 }
 
 func TestMust(t *testing.T) {

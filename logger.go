@@ -3,6 +3,8 @@ package logger
 import (
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"testing"
 
 	"github.com/blendle/go-logger/stackdriver"
@@ -40,6 +42,8 @@ func New(service, version string, options ...zap.Option) *zap.Logger {
 		Version: version,
 	}))
 
+	go levelToggler(level)
+
 	return Must(config.Build(append(options, stackcore, fields)...))
 }
 
@@ -65,4 +69,19 @@ func TestNew(tb testing.TB, options ...zap.Option) (*zap.Logger, *observer.Obser
 	zaplog := New("test", "v0.0.1", append(options, opt)...)
 
 	return zaplog, logs
+}
+
+func levelToggler(level zap.AtomicLevel) {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGUSR1)
+
+	for {
+		<-ch
+
+		if level.Level() == zap.DebugLevel {
+			level.SetLevel(zap.InfoLevel)
+		} else {
+			level.SetLevel(zap.DebugLevel)
+		}
+	}
 }
