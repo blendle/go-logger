@@ -1,6 +1,7 @@
 package logger_test
 
 import (
+	"errors"
 	"os"
 	"syscall"
 	"testing"
@@ -140,4 +141,10 @@ func TestMust(t *testing.T) {
 	t.Parallel()
 
 	assert.IsType(t, &zap.Logger{}, logger.Must(zap.NewProduction()))
+}
+
+func TestMust_Panic(t *testing.T) {
+	t.Parallel()
+
+	assert.Panics(t, func() { logger.Must(zap.NewNop(), errors.New("panic")) })
 }
