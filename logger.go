@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"log"
 	"os"
 	"testing"
 
@@ -48,7 +49,8 @@ func New(service, version string, options ...zap.Option) *zap.Logger {
 // This can be used for example with `Must(zap.NewProduction())`
 func Must(zaplog *zap.Logger, err error) *zap.Logger {
 	if err != nil {
-		panic(err)
+		log.Printf(`{"severity": "EMERGENCY", "message": "%v"}`, err)
+		os.Exit(1)
 	}
 
 	return zaplog
