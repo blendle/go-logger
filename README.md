@@ -39,6 +39,36 @@ fields := zap.Fields(zap.String("alwaysAdd", "this"))
 logger := logger.New("my-service", "cf89f839", sampler, fields)
 ```
 
+### Stackdriver logging
+
+You can optionally add Stackdriver specific fields to your logs. These can be
+used by Stackdriver to [improve log readability/grouping][sd].
+
+```golang
+import stackdriver "github.com/blendle/go-logger/stackdriver"
+```
+
+```golang
+logger.Info("Hello", stackdriver.LogUser("token"))
+```
+
+```golang
+logger.Info("Hello", stackdriver.LogHTTPRequest(&stackdriver.HTTPRequest{
+  Method:             "GET",
+  URL:                "/foo",
+  UserAgent:          "bar",
+  Referrer:           "baz",
+  ResponseStatusCode: 200,
+  RemoteIP:           "1.2.3.4",
+})
+```
+
+```golang
+logger.Info("Hello", stackdriver.LogLabels("key-1", "hello", "key-2", "world"))
+```
+
+[sd]: https://cloud.google.com/error-reporting/docs/formatting-error-messages
+
 ## Debugging
 
 You can send the `USR1` signal to your application to switch the log level
