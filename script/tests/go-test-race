@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# script/tests/go-test-race: Run tests with race checker
+
+set -e
+
+cd "$(dirname "$0")/../.."
+
+go test -cpu=1,2,4 -race "${@:-./...}"
