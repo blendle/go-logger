@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestNew(t *testing.T) {
@@ -94,6 +95,24 @@ func TestLogger_Development_Unset(t *testing.T) {
 	// call will not cause a panic.
 	assert.NotPanics(t, fn)
 	assert.Len(t, logs.All(), 1)
+}
+
+func TestLogger_Debug_Enabled(t *testing.T) {
+	_ = os.Setenv("DEBUG", "1")
+	defer func() { _ = os.Unsetenv("DEBUG") }()
+
+	logger := logger.New("", "")
+
+	assert.True(t, logger.Core().Enabled(zapcore.DebugLevel))
+}
+
+func TestLogger_Debug_Disabled(t *testing.T) {
+	t.Parallel()
+
+	logger := logger.New("", "")
+
+	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))
+	assert.True(t, logger.Core().Enabled(zapcore.InfoLevel))
 }
 
 func TestMust(t *testing.T) {

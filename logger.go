@@ -26,6 +26,10 @@ func New(service, version string, options ...zap.Option) *zap.Logger {
 		config.Development = true
 	}
 
+	if _, ok := os.LookupEnv("DEBUG"); ok {
+		level.SetLevel(zap.DebugLevel)
+	}
+
 	stackcore := zap.WrapCore(func(core zapcore.Core) zapcore.Core {
 		return &stackdriver.Core{Core: core}
 	})
