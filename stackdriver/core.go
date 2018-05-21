@@ -84,7 +84,9 @@ func (c *Core) Write(entry zapcore.Entry, fields []zapcore.Field) error {
 	}
 
 	fields, ctx := c.extractCtx(fields)
-	fields = append(fields, zap.Object("context", ctx))
+	if ctx != nil {
+		fields = append(fields, zap.Object("context", ctx))
+	}
 
 	return c.Core.Write(entry, fields)
 }
@@ -104,6 +106,10 @@ func (c *Core) extractCtx(fields []zapcore.Field) ([]zapcore.Field, *Context) {
 		default:
 			output = append(output, f)
 		}
+	}
+
+	if *ctx == (Context{}) {
+		ctx = nil
 	}
 
 	return output, ctx

@@ -88,6 +88,16 @@ func TestCore(t *testing.T) {
 		assert.Equal(t, "bar", actual.Foo)
 	})
 
+	t.Run("Without context", func(t *testing.T) {
+		defer writer.Reset()
+
+		logger.Debug("")
+
+		var actual logEntry
+		require.Nil(t, json.Unmarshal(writer.Bytes(), &actual))
+		assert.Nil(t, actual.Context)
+	})
+
 	t.Run("With context", func(t *testing.T) {
 		defer writer.Reset()
 

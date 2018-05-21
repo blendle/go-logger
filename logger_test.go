@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	logger "github.com/blendle/go-logger"
+	"github.com/blendle/go-logger/stackdriver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -28,7 +29,7 @@ func TestLogger_Stackdriver_Context(t *testing.T) {
 	t.Parallel()
 
 	logger, logs := logger.TestNew(t)
-	logger.Warn("")
+	logger.Warn("", stackdriver.LogUser("test"))
 
 	require.Len(t, logs.All(), 1)
 	assert.NotNil(t, logs.All()[0].ContextMap()["context"])
