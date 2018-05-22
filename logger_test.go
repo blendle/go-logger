@@ -125,17 +125,17 @@ func TestLogger_LevelToggler(t *testing.T) {
 	t.Parallel()
 
 	logger := logger.Must(logger.New("", ""))
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))
 
 	_ = syscall.Kill(syscall.Getpid(), syscall.SIGUSR1)
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	assert.True(t, logger.Core().Enabled(zapcore.DebugLevel))
 
 	_ = syscall.Kill(syscall.Getpid(), syscall.SIGUSR1)
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))
 }
