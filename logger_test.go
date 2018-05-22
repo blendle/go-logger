@@ -18,7 +18,10 @@ import (
 func TestNew(t *testing.T) {
 	t.Parallel()
 
-	assert.IsType(t, &zap.Logger{}, logger.New("", ""))
+	logger, err := logger.New("", "")
+	require.NoError(t, err)
+
+	assert.IsType(t, &zap.Logger{}, logger)
 }
 
 func TestTestNew(t *testing.T) {
@@ -104,7 +107,7 @@ func TestLogger_Debug_Enabled(t *testing.T) {
 	_ = os.Setenv("DEBUG", "1")
 	defer func() { _ = os.Unsetenv("DEBUG") }()
 
-	logger := logger.New("", "")
+	logger := logger.Must(logger.New("", ""))
 
 	assert.True(t, logger.Core().Enabled(zapcore.DebugLevel))
 }
@@ -112,7 +115,7 @@ func TestLogger_Debug_Enabled(t *testing.T) {
 func TestLogger_Debug_Disabled(t *testing.T) {
 	t.Parallel()
 
-	logger := logger.New("", "")
+	logger := logger.Must(logger.New("", ""))
 
 	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))
 	assert.True(t, logger.Core().Enabled(zapcore.InfoLevel))
@@ -121,7 +124,7 @@ func TestLogger_Debug_Disabled(t *testing.T) {
 func TestLogger_LevelToggler(t *testing.T) {
 	t.Parallel()
 
-	logger := logger.New("", "")
+	logger := logger.Must(logger.New("", ""))
 	time.Sleep(1 * time.Millisecond)
 
 	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))

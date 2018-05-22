@@ -13,7 +13,7 @@ import (
 )
 
 // New returns a new logger, ready to use in our services.
-func New(service, version string, options ...zap.Option) *zap.Logger {
+func New(service, version string, options ...zap.Option) (*zap.Logger, error) {
 	level := zap.NewAtomicLevelAt(zapcore.InfoLevel)
 
 	config := &zap.Config{
@@ -43,7 +43,7 @@ func New(service, version string, options ...zap.Option) *zap.Logger {
 
 	go levelToggler(level)
 
-	return Must(config.Build(append(options, stackcore, fields)...))
+	return config.Build(append(options, stackcore, fields)...)
 }
 
 // Must is a convenience function that takes a zaplog and error as input, panics
@@ -66,7 +66,7 @@ func TestNew(tb testing.TB, options ...zap.Option) (*zap.Logger, *observer.Obser
 	core, logs := observer.New(zapcore.DebugLevel)
 	opt := zap.WrapCore(func(_ zapcore.Core) zapcore.Core { return core })
 
-	zaplog := New("test", "v0.0.1", append(options, opt)...)
+	zaplog := Must(New("test", "v0.0.1", append(options, opt)...))
 
 	return zaplog, logs
 }

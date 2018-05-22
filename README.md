@@ -15,7 +15,7 @@ Add to your `main.go`:
 import logger "github.com/blendle/go-logger"
 
 func main() {
-  logger := logger.New("my-service", "cf89f839")
+  logger := logger.Must(logger.New("my-service", "cf89f839"))
 }
 ```
 
@@ -36,7 +36,7 @@ sampler := zap.WrapCore(func(core zapcore.Core) zapcore.Core {
 
 fields := zap.Fields(zap.String("alwaysAdd", "this"))
 
-logger := logger.New("my-service", "cf89f839", sampler, fields)
+logger := logger.Must(logger.New("my-service", "cf89f839", sampler, fields))
 ```
 
 ### Stackdriver logging
