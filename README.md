@@ -45,29 +45,17 @@ You can optionally add Stackdriver specific fields to your logs. These can be
 used by Stackdriver to [improve log readability/grouping][sd].
 
 ```golang
-import stackdriver "github.com/blendle/go-logger/stackdriver"
+import zapdriver "github.com/blendle/zapdriver"
 ```
 
 ```golang
-logger.Info("Hello", stackdriver.LogUser("token"))
+logger.Info("Hello", zapdriver.Label("hello", "world"))
 ```
 
-```golang
-logger.Info("Hello", stackdriver.LogHTTPRequest(&stackdriver.HTTPRequest{
-  Method:             "GET",
-  URL:                "/foo",
-  UserAgent:          "bar",
-  Referrer:           "baz",
-  ResponseStatusCode: 200,
-  RemoteIP:           "1.2.3.4",
-})
-```
-
-```golang
-logger.Info("Hello", stackdriver.LogLabels("key-1", "hello", "key-2", "world"))
-```
+See [here][zd] for all available Stackdriver fields.
 
 [sd]: https://cloud.google.com/error-reporting/docs/formatting-error-messages
+[zd]: https://github.com/blendle/zapdriver#special-purpose-logging-fields
 
 ## Debugging
 
