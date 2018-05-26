@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# script/tests/go-test: Run tests
+
+set -e
+
+cd "$(dirname "$0")/../.."
+
+go test "${@:-./...}"

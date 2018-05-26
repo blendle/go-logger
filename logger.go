@@ -1,108 +1,87 @@
 package logger
 
 import (
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"testing"
 
+	"github.com/blendle/go-logger/stackdriver"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
-// Config of the current logger instance
-type Config struct {
-	App         string
-	Tier        string
-	Production  bool
-	Version     string
-	Environment string
-}
+// New returns a new logger, ready to use in our services.
+func New(service, version string, options ...zap.Option) (*zap.Logger, error) {
+	level := zap.NewAtomicLevelAt(zapcore.InfoLevel)
 
-// L is the global logger instance.
-var L = zap.NewNop()
-
-// LogLevel is the current log level of the logger.
-var LogLevel = zap.NewAtomicLevel()
-
-// Init initializes the logger
-func Init(config *Config, options ...func(zap.Config)) {
-	var err error
-
-	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:       "timestamp",
-		LevelKey:      "severity",
-		NameKey:       "logger",
-		CallerKey:     "caller",
-		MessageKey:    "message",
-		StacktraceKey: "stacktrace",
-		LineEnding:    zapcore.DefaultLineEnding,
-		EncodeLevel: func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-			switch l {
-			case zapcore.DebugLevel:
-				enc.AppendString("DEBUG")
-			case zapcore.InfoLevel:
-				enc.AppendString("INFO")
-			case zapcore.WarnLevel:
-				enc.AppendString("WARNING")
-			case zapcore.ErrorLevel:
-				enc.AppendString("ERROR")
-			case zapcore.DPanicLevel:
-				enc.AppendString("CRITICAL")
-			case zapcore.PanicLevel:
-				enc.AppendString("ALERT")
-			case zapcore.FatalLevel:
-				enc.AppendString("EMERGENCY")
-			}
-		},
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
-	}
-
-	zapconfig := zap.Config{
-		Level:            LogLevel,
-		Development:      !config.Production,
+	config := &zap.Config{
+		Level:            level,
 		Encoding:         "json",
-		EncoderConfig:    encoderConfig,
+		EncoderConfig:    stackdriver.EncoderConfig,
 		OutputPaths:      []string{"stderr"},
 		ErrorOutputPaths: []string{"stderr"},
 	}
 
-	for _, option := range options {
-		option(zapconfig)
+	if env, ok := os.LookupEnv("ENV"); ok && env != "production" {
+		config.Development = true
 	}
 
-	if os.Getenv("DEBUG") == "true" {
-		zapconfig.Level.SetLevel(zap.DebugLevel)
+	if _, ok := os.LookupEnv("DEBUG"); ok {
+		level.SetLevel(zap.DebugLevel)
 	}
 
-	go logLevelToggler()
+	stackcore := zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+		return &stackdriver.Core{Core: core}
+	})
 
-	app := zap.String("app", config.App)
-	tier := zap.String("tier", config.Tier)
-	production := zap.Bool("production", config.Production)
-	version := zap.String("version", config.Version)
-	environment := zap.String("environment", config.Environment)
+	fields := zap.Fields(stackdriver.LogServiceContext(&stackdriver.ServiceContext{
+		Service: service,
+		Version: version,
+	}))
 
-	L, err = zapconfig.Build(zap.Fields(app, tier, production, version, environment))
-	if err != nil {
-		log.Printf(`{"severity": "fatal", "msg": "%v"}`, err)
-		os.Exit(1)
-	}
+	go levelToggler(level)
+
+	return config.Build(append(options, stackcore, fields)...)
 }
 
-func logLevelToggler() {
-	ch := make(chan os.Signal)
+// Must is a convenience function that takes a zaplog and error as input, panics
+// if the error is not nil, and returns the passed in logger.
+//
+// This can be used for example with `Must(zap.NewProduction())`
+func Must(zaplog *zap.Logger, err error) *zap.Logger {
+	if err != nil {
+		panic(err)
+	}
+
+	return zaplog
+}
+
+// TestNew calls New, but returns both the logger, and an observer that can be
+// used to fetch and compare delivered logs.
+func TestNew(tb testing.TB, options ...zap.Option) (*zap.Logger, *observer.ObservedLogs) {
+	tb.Helper()
+
+	core, logs := observer.New(zapcore.DebugLevel)
+	opt := zap.WrapCore(func(_ zapcore.Core) zapcore.Core { return core })
+
+	zaplog := Must(New("test", "v0.0.1", append(options, opt)...))
+
+	return zaplog, logs
+}
+
+func levelToggler(level zap.AtomicLevel) {
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGUSR1)
 
 	for {
 		<-ch
 
-		if LogLevel.Level() == zap.DebugLevel {
-			LogLevel.SetLevel(zap.InfoLevel)
+		if level.Level() == zap.DebugLevel {
+			level.SetLevel(zap.InfoLevel)
 		} else {
-			LogLevel.SetLevel(zap.DebugLevel)
+			level.SetLevel(zap.DebugLevel)
 		}
 	}
 }
