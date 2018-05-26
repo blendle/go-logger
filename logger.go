@@ -4,12 +4,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"testing"
 
 	"github.com/blendle/zapdriver"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"go.uber.org/zap/zaptest/observer"
 )
 
 // New returns a new logger, ready to use in our services.
@@ -54,19 +52,6 @@ func Must(zaplog *zap.Logger, err error) *zap.Logger {
 	}
 
 	return zaplog
-}
-
-// TestNew calls New, but returns both the logger, and an observer that can be
-// used to fetch and compare delivered logs.
-func TestNew(tb testing.TB, options ...zap.Option) (*zap.Logger, *observer.ObservedLogs) {
-	tb.Helper()
-
-	core, logs := observer.New(zapcore.DebugLevel)
-	opt := zap.WrapCore(func(_ zapcore.Core) zapcore.Core { return core })
-
-	zaplog := Must(New("test", "v0.0.1", append(options, opt)...))
-
-	return zaplog, logs
 }
 
 func levelToggler(level zap.AtomicLevel) {

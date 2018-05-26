@@ -24,15 +24,6 @@ func TestNew(t *testing.T) {
 	assert.IsType(t, &zap.Logger{}, logger)
 }
 
-func TestTestNew(t *testing.T) {
-	t.Parallel()
-
-	logger, logs := logger.TestNew(t)
-	logger.Debug("")
-
-	assert.Len(t, logs.All(), 1)
-}
-
 func TestLogger_Stackdriver_Labels(t *testing.T) {
 	t.Parallel()
 
