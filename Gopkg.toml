@@ -1,4 +1,8 @@
 [[constraint]]
+  name = "github.com/blendle/zapdriver"
+  version = "^1.0.0"
+
+[[constraint]]
   name = "go.uber.org/zap"
   version = "^1.4.1"
 
