@@ -6,7 +6,7 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/blendle/go-logger/stackdriver"
+	"github.com/blendle/zapdriver"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -19,7 +19,7 @@ func New(service, version string, options ...zap.Option) (*zap.Logger, error) {
 	config := &zap.Config{
 		Level:            level,
 		Encoding:         "json",
-		EncoderConfig:    stackdriver.EncoderConfig,
+		EncoderConfig:    zapdriver.NewProductionEncoderConfig(),
 		OutputPaths:      []string{"stderr"},
 		ErrorOutputPaths: []string{"stderr"},
 	}
@@ -32,14 +32,12 @@ func New(service, version string, options ...zap.Option) (*zap.Logger, error) {
 		level.SetLevel(zap.DebugLevel)
 	}
 
-	stackcore := zap.WrapCore(func(core zapcore.Core) zapcore.Core {
-		return &stackdriver.Core{Core: core}
-	})
+	stackcore := zapdriver.WrapCore()
 
-	fields := zap.Fields(stackdriver.LogServiceContext(&stackdriver.ServiceContext{
-		Service: service,
-		Version: version,
-	}))
+	fields := zap.Fields(
+		zapdriver.Label("service", service),
+		zapdriver.Label("version", version),
+	)
 
 	go levelToggler(level)
 
