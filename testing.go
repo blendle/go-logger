@@ -16,6 +16,16 @@ func TestNew(tb testing.TB, options ...zap.Option) (*zap.Logger, *observer.Obser
 	return TestNewWithLevel(tb, zapcore.DebugLevel, options...)
 }
 
+// TestNewWarn is equal to TestNew, except that it sets the minimum log level
+// required to record an entry in the recorder to "Warn". This convenience
+// function can be used to validate that no warnings, or errors are logged when
+// testing a unit of code.
+func TestNewWarn(tb testing.TB, options ...zap.Option) (*zap.Logger, *observer.ObservedLogs) {
+	tb.Helper()
+
+	return TestNewWithLevel(tb, zapcore.WarnLevel, options...)
+}
+
 // TestNewWithLevel is equal to TestNew, except that it takes an extra argument,
 // dictating the minimum log level required to record an entry in the recorder.
 func TestNewWithLevel(tb testing.TB, level zapcore.LevelEnabler, options ...zap.Option) (*zap.Logger, *observer.ObservedLogs) {

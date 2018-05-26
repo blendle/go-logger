@@ -21,14 +21,27 @@ func TestTestNew(t *testing.T) {
 	assert.Len(t, logs.All(), 1)
 }
 
+func TestTestNewWarn(t *testing.T) {
+	t.Parallel()
+
+	logger, logs := logger.TestNewWarn(t)
+	logger.Debug("")
+	logger.Warn("")
+	logger.Error("")
+
+	require.Len(t, logs.All(), 2)
+	assert.Equal(t, zapcore.WarnLevel, logs.All()[0].Level)
+	assert.Equal(t, zapcore.ErrorLevel, logs.All()[1].Level)
+}
+
 func TestTestNewWithLevel(t *testing.T) {
 	t.Parallel()
 
 	logger, logs := logger.TestNewWithLevel(t, zapcore.ErrorLevel)
 	logger.Debug("")
 	logger.Warn("")
-	logger.Error("error")
-	logger.DPanic("dpanic")
+	logger.Error("")
+	logger.DPanic("")
 
 	require.Len(t, logs.All(), 2)
 	assert.Equal(t, zapcore.ErrorLevel, logs.All()[0].Level)
