@@ -68,3 +68,22 @@ You can also set the `DEBUG` environment variable to `true` to have the
 application launch with the default log level set to `DEBUG` instead of `INFO`.
 
 Again, you can send `USR1` to toggle back to `INFO` as well.
+
+## Testing
+
+This package contains a public testing API you can use if you need to assert
+a log entry exists.
+
+```golang
+// TestNew calls New, but returns both the logger, and an observer that can be
+// used to fetch and compare delivered logs.
+TestNew(tb testing.TB, options ...zap.Option) (*zap.Logger, *observer.ObservedLogs)
+```
+
+```golang
+// TestNewWithLevel is equal to TestNew, except that it takes an extra argument,
+// dictating the minimum log level required to record an entry in the recorder.
+TestNewWithLevel(tb testing.TB, level zapcore.LevelEnabler, options ...zap.Option) (*zap.Logger, *observer.ObservedLogs)
+```
+
+see `testing.go` for more details.
