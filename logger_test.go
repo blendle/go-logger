@@ -81,6 +81,16 @@ func TestLogger_Debug_Enabled(t *testing.T) {
 	assert.True(t, logger.Core().Enabled(zapcore.DebugLevel))
 }
 
+func TestLogger_Debug_Explicitly_Disabled(t *testing.T) {
+	_ = os.Setenv("DEBUG", "0")
+	defer func() { _ = os.Unsetenv("DEBUG") }()
+
+	logger := logger.Must(logger.New("", ""))
+
+	assert.False(t, logger.Core().Enabled(zapcore.DebugLevel))
+	assert.True(t, logger.Core().Enabled(zapcore.InfoLevel))
+}
+
 func TestLogger_Debug_Disabled(t *testing.T) {
 	t.Parallel()
 
