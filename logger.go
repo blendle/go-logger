@@ -26,7 +26,7 @@ func New(service, version string, options ...zap.Option) (*zap.Logger, error) {
 		config.Development = true
 	}
 
-	if _, ok := os.LookupEnv("DEBUG"); ok {
+	if v := os.Getenv("DEBUG"); v != "" && v != "0" && v != "false" {
 		level.SetLevel(zap.DebugLevel)
 	}
 
