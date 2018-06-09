@@ -22,7 +22,7 @@ func New(service, version string, options ...zap.Option) (*zap.Logger, error) {
 		ErrorOutputPaths: []string{"stderr"},
 	}
 
-	if env, ok := os.LookupEnv("ENV"); ok && env != "production" {
+	if os.Getenv("ENV") == "development" {
 		config.Development = true
 	}
 

@@ -34,28 +34,28 @@ func TestLogger_Stackdriver_Labels(t *testing.T) {
 	assert.NotNil(t, logs.All()[0].ContextMap()["labels"])
 }
 
-func TestLogger_Development_NonProduction(t *testing.T) {
-	_ = os.Setenv("ENV", "non-production")
+func TestLogger_DevelopmentEnv(t *testing.T) {
+	_ = os.Setenv("ENV", "development")
 	defer func() { _ = os.Unsetenv("ENV") }()
 
 	logger, logs := logger.TestNew(t)
 	fn := func() { logger.DPanic("") }
 
-	// because we've set the environment to anything other than "production", any
-	// `DPanic` log call will cause a panic.
+	// because we've set the environment to "development", any `DPanic` log call
+	// will cause a panic.
 	assert.Panics(t, fn)
 	assert.Len(t, logs.All(), 1)
 }
 
-func TestLogger_Development_Production(t *testing.T) {
-	_ = os.Setenv("ENV", "production")
+func TestLogger_DevelopmentWrongEnv(t *testing.T) {
+	_ = os.Setenv("ENV", "not-development")
 	defer func() { _ = os.Unsetenv("ENV") }()
 
 	logger, logs := logger.TestNew(t)
 	fn := func() { logger.DPanic("") }
 
-	// because we've set the environment to "production", any `DPanic` log call
-	// will not cause a panic.
+	// because we've set the environment to anything other than "development", any
+	// `DPanic` log call will not cause a panic.
 	assert.NotPanics(t, fn)
 	assert.Len(t, logs.All(), 1)
 }
@@ -69,6 +69,18 @@ func TestLogger_Development_Unset(t *testing.T) {
 	// because we haven't set the "ENV" environment variable, any `DPanic` log
 	// call will not cause a panic.
 	assert.NotPanics(t, fn)
+	assert.Len(t, logs.All(), 1)
+}
+
+func TestLogger_Development_Option(t *testing.T) {
+	t.Parallel()
+
+	logger, logs := logger.TestNew(t, zap.Development())
+	fn := func() { logger.DPanic("") }
+
+	// because we've passed in `zap.Development()`, any `DPanic` log call will
+	// cause a panic.
+	assert.Panics(t, fn)
 	assert.Len(t, logs.All(), 1)
 }
 
